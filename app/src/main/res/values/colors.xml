@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#111</color>
+    <color name="colorPrimaryDark">#FFF</color>
+    <color name="colorAccent">#ea3732</color>
+
+    <color name="city_name">#333333</color>
+    <color name="country_name">#8c8c8c</color>
+
+</resources>
