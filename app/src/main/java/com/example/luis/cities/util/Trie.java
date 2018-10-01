@@ -84,8 +84,37 @@ public class Trie {
 
     private List<Data> initLst;
 
+    public  List<Data> quickSort(List<Data> list)
+    {
+        if (list.size() <= 1)
+            return list; // Already sorted
+
+        List<Data> sorted = new ArrayList<Data>();
+        List<Data> lesser = new ArrayList<Data>();
+        List<Data> greater = new ArrayList<Data>();
+        Data pivot = list.get(list.size()-1); // Use last as pivot
+        for (int i = 0; i < list.size()-1; i++)
+        {
+
+            if (list.get(i).compareTo(pivot) < 0)
+                lesser.add(list.get(i));
+            else
+                greater.add(list.get(i));
+        }
+
+        lesser = quickSort(lesser);
+        greater = quickSort(greater);
+
+        lesser.add(pivot);
+        lesser.addAll(greater);
+        sorted = lesser;
+
+        return sorted;
+    }
+
     public List<Data> initData(){
 
+        initLst= quickSort(initLst);
         return initLst;
 
     }

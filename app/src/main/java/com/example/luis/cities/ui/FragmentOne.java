@@ -67,7 +67,8 @@ public class FragmentOne extends BaseFragment implements CityAdapter.CityListene
         getSearchView().setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                Log.d("frag","submit...");
+                return true;
             }
 
             @Override
@@ -107,6 +108,8 @@ public class FragmentOne extends BaseFragment implements CityAdapter.CityListene
         recyclerView.setAdapter(adapter);
 
         //initData();
+
+        Log.d("frag","init Loader again...");
 
         getActivity().getSupportLoaderManager().initLoader(R.id.string_id,null, this);
 
