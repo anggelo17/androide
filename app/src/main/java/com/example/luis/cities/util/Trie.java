@@ -14,6 +14,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/*
+
+In order to perform prefix filtering I have implemented a Trie Structure where each node represents a letter
+from a to z. Moreover each node has a flag endOfWord to tell the if the current node is the end of a word or not.
+Since we can found cities with the same name even in the same country; we can differentiate them having a list of id
+for the same name of  city. For example  city Athens,US and  city Athens,Greece ; every time we insert the word Athens we will
+insert their id also because they are differents cities.
+An arrayMap was also used because once we have the results(list of ids), we can get the whole information wit the id.
+This map has an id as key and a object Data as value.
+
+For retrieving the cities given a prefix we have to traverse the trie in alphabetic order; looking from
+a to z; in that order . In this way we can get the cties ordered in alphabetic order. We will get a list of id as a result
+. this List will be used for getting the whole Dat object info like name,country and coordinates.
+
+Complexity for retrieving the cities given a prefix is O(P) + O(N); where P is the length of the prefix and
+N is the total number of nodes in the trie.
+
+ */
+
+
 public class Trie {
 
     final int ALPHABET_SIZE = 26;
@@ -53,8 +73,7 @@ public class Trie {
 
 
     // If not present, inserts key into trie
-    // If the key is prefix of trie node,
-    // just marks leaf node
+    // If the key is prefix of trie node, just mark it
     public void insert(TrieNode root,String key,int id)
     {
         int level;
@@ -120,6 +139,7 @@ public class Trie {
     }
 
 
+    //insert all the data frm json file.
     public void insertAll(InputStream inputStream){
 
         Gson gs=new Gson();
@@ -142,6 +162,8 @@ public class Trie {
         }
 
     }
+
+    //given the root and prefix, this will traverse the trie and add the id to a list of results.
 
     public String printSuggestions(TrieNode root,String prefix){
 
@@ -170,7 +192,7 @@ public class Trie {
             for(int idd:crawl.idlst)
                 lstRes.add(idd);
 
-            System.out.println(prefix);
+           // System.out.println(prefix);
             return "Found 1";
         }
 
@@ -192,7 +214,7 @@ public class Trie {
         if(crawl.isEndOfWord){
             for(int idd:crawl.idlst){
                 lstRes.add(idd);
-                System.out.println(pref+"--ids--"+idd);
+                //System.out.println(pref+"--ids--"+idd);
             }
         }
 
@@ -202,11 +224,9 @@ public class Trie {
         {
             if (crawl.children[i] != null)
             {
-                // append current character to currPrefix string
-                char[] c = Character.toChars(97+i);
-                //pref=;
 
-                // recur over the rest
+                char[] c = Character.toChars(97+i);
+
                 suggestion(crawl.children[i], pref+ c[0]);
             }
         }
