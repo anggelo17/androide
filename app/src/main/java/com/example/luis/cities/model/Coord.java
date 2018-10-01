@@ -1,7 +1,9 @@
 package com.example.luis.cities.model;
 
 
-public class Coord {
+import java.io.Serializable;
+
+public class Coord implements Serializable {
 
     private String lon;
     private String lat;

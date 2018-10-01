@@ -1,15 +1,13 @@
 package com.example.luis.cities;
 
 import android.content.Context;
-import android.support.v4.util.ArrayMap;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -19,7 +17,7 @@ import com.example.luis.cities.util.Trie;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> implements Filterable {
+public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> {
 
 
     private Context context;
@@ -28,13 +26,19 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
     private CityListener listener;
 
     private Trie trie;
-    ArrayMap arrayMap;
+
+
+
+    private Handler _handler;
+
+    private boolean pending=false;
 
     public CityAdapter(Context context, List<Data> cityList, CityListener listener) {
         this.context = context;
         this.listener = listener;
         this.citiesList = cityList;
         this.citiesListFiltered = cityList;
+
     }
 
 
@@ -95,15 +99,18 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
         holder.country.setText(d.getCountry());
     }
 
-    public void updateData(List<Data> data){
+
+    public void initialLoad(final List<Data> data){
+
         citiesList=data;
         citiesListFiltered=data;
         notifyDataSetChanged();
+
     }
 
-    public void setTrie(Trie trie, ArrayMap arrayMap){
+    public void setTrie(Trie trie){
         this.trie=trie;
-        this.arrayMap=arrayMap;
+
     }
 
     /**
@@ -116,22 +123,31 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
         return citiesListFiltered.size();
     }
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
+    public void filter(String query) {
+
+        if(pending)
+            return;
+
+        final String prefix=query;
+
+        pending=true;
+        if (_handler == null) _handler = new Handler();
+
+        new Thread(new Runnable() {
             @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-
-
-                String prefix= charSequence.toString().toLowerCase();
+            public void run() {
 
                 if (prefix.isEmpty()) {
+                    Log.d("filter","empty..");
                     citiesListFiltered = citiesList;
+
+                    Log.d("filter","empty.."+citiesListFiltered.size());
+
                 } else {
 
-                    Log.d("filter", "start filtering..with" + charSequence.toString());
-                    long s = System.nanoTime();
+                    Log.d("filter", "start filtering..with" + prefix);
 
+                    long s = System.nanoTime();
                     String comp = trie.printSuggestions(trie.rootNode, prefix);
                     Log.d("filter", "--" + comp);
                     double e = (double) (System.nanoTime() - s) / 1000000000.0;
@@ -139,32 +155,37 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
 
                     List<Data> filteredList = new ArrayList<>();
 
-                    for (int k = 0; k < trie.lstRes.size(); k++) {
+                    filteredList.addAll(trie.getListResults());
 
-                        Data d = (Data) arrayMap.get(trie.lstRes.get(k));
-                        Log.d("filter", d.get_id() + "--" + d.getCountry() + "--" + d.getName());
-                        filteredList.add(d);
+                    citiesListFiltered=filteredList;
 
-                    }
-
-                    citiesListFiltered = filteredList;
                 }
 
-               // Log.d("filter",);
+                _handler.post(new Runnable() {
+                    @Override
+                    public void run() {
 
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = citiesListFiltered;
-                return filterResults;
-            }
+                        updateRecyData(citiesListFiltered);
 
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                    }
+                });
 
-                citiesListFiltered = (ArrayList<Data>) filterResults.values;
-                notifyDataSetChanged();
 
             }
-        };
+        }).start();
+
+
+
+    }
+
+    private void updateRecyData(List<Data> filteredList) {
+
+
+        pending=false;
+        this.citiesListFiltered = filteredList;
+        notifyDataSetChanged();
+
+
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{

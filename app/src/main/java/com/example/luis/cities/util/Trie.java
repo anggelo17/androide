@@ -1,12 +1,28 @@
 package com.example.luis.cities.util;
 
+import android.support.v4.util.ArrayMap;
+import android.util.Log;
+
+import com.example.luis.cities.R;
+import com.example.luis.cities.model.Data;
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Trie {
 
     final int ALPHABET_SIZE = 26;
 
     public TrieNode rootNode;
+
+    public ArrayMap<Integer,Data> arrayMap;
+
+
 
     public class TrieNode
 
@@ -66,11 +82,45 @@ public class Trie {
             pCrawl.idlst.add(id);
     }
 
+    private List<Data> initLst;
+
+    public List<Data> initData(){
+
+        return initLst;
+
+    }
+
+
+    public void insertAll(InputStream inputStream){
+
+        Gson gs=new Gson();
+        InputStream in = inputStream;
+
+        BufferedReader buffer=new BufferedReader(new InputStreamReader(in));
+
+        Data[] lst= gs.fromJson(buffer,Data[].class);
+
+        initLst= Arrays.asList(lst);
+
+
+
+        arrayMap=new ArrayMap<>();
+        TrieNode root= this.createRoot();
+
+        for (Data d:lst) {
+            this.insert(root,d.getName().toLowerCase().replaceAll("[^a-z]", ""),Integer.parseInt(d.get_id()));
+            arrayMap.put(Integer.parseInt(d.get_id()),d);
+        }
+
+    }
+
     public String printSuggestions(TrieNode root,String prefix){
 
         TrieNode crawl= root;
 
         lstRes= new ArrayList<>();
+
+        prefix = prefix.toLowerCase();
 
         int level;
         for(level=0;level<prefix.length();level++){
@@ -140,6 +190,20 @@ public class Trie {
             if (crawl.children[i]!=null)
                 return false;
         return true;
+    }
+
+    public List<Data> getListResults(){
+
+        List<Data> filteredList = new ArrayList<>();
+
+        for (int k = 0; k < this.lstRes.size(); k++) {
+
+            Data d = (Data) arrayMap.get(this.lstRes.get(k));
+            filteredList.add(d);
+
+        }
+
+        return filteredList;
     }
 
 

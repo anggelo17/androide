@@ -42,66 +42,19 @@ public class MyLoader extends AsyncTaskLoader<List<Data>> {
     @Override
     public List<Data> loadInBackground() {
 
-        Gson gs=new Gson();
         InputStream in = null;
         try {
             in = getContext().getResources().openRawResource(R.raw.cities);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        BufferedReader buffer=new BufferedReader(new InputStreamReader(in));
 
-        Data[] lst= gs.fromJson(buffer,Data[].class);
-
-
-        Log.d("lst","---finish reading file"+lst[0].getName());
-
-
-        ArrayMap<Integer,Data> arrayMap=new ArrayMap<>();
         Trie trie = new Trie();
-        trie.createRoot();
-
-        for (Data d:lst) {
-            trie.insert(trie.rootNode,d.getName().toLowerCase().replaceAll("[^a-z]", ""),Integer.parseInt(d.get_id()));
-            arrayMap.put(Integer.parseInt(d.get_id()),d);
-        }
-
+        trie.insertAll(in);
         this.trie=trie;
-        this.arrMap= arrayMap;
 
-        List<Data> lista= Arrays.asList(lst);
+        List<Data> lista= trie.initData();
         Log.d("lst","---finish filling map"+lista.get(0).getName());
-
-
-        long s=System.nanoTime();
-        String comp = trie.printSuggestions(trie.rootNode,"sydney");
-        Log.d("trie","--"+comp);
-        double e= (double)(System.nanoTime()-s) / 1000000000.0;
-        Log.d("trie","time=="+ e+" size=="+trie.lstRes.size());
-
-        for(int k=0;k<trie.lstRes.size();k++){
-
-            Data d=arrayMap.get(trie.lstRes.get(k));
-            Log.d("trie",d.get_id()+"--"+d.getCountry()+"--"+d.getName() );
-
-        }
-
-
-
-
-        Collections.sort(lista,new Comparator<Data>() {
-            @Override
-            public int compare(Data o1, Data o2) {
-                int r= o1.getName().compareTo(o2.getName());
-                if(r==0)
-                    return o1.getCountry().compareTo(o2.getCountry()) ;
-                else
-                    return r;
-            }
-        });
-
-        Log.d("lst","---finish sorting"+lista.get(0).getName());
-
 
         return lista;
     }
