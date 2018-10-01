@@ -31,7 +31,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
 
     private Handler _handler;
 
-    private boolean pending=false;
+   // private boolean pending=false;
 
     public CityAdapter(Context context, List<Data> cityList, CityListener listener) {
         this.context = context;
@@ -125,12 +125,12 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
 
     public void filter(String query) {
 
-        if(pending)
-            return;
+//        if(pending)
+//            return;
 
         final String prefix=query;
 
-        pending=true;
+       // pending=true;
         if (_handler == null) _handler = new Handler();
 
         new Thread(new Runnable() {
@@ -181,7 +181,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.MyViewHolder> 
     private void updateRecyData(List<Data> filteredList) {
 
 
-        pending=false;
+       // pending=false;
         this.citiesListFiltered = filteredList;
         notifyDataSetChanged();
 
